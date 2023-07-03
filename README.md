@@ -5,7 +5,7 @@ Public Discord bot to use, written completely in Python 3.11.
 Add time conversion, music, dice rolling
 
 ## Requested Features 
-> no particular order
+### no particular order
 Shorthand roll function (e.g. !d20)
 Advantage and Disadvantage rolls
 Comments after rolls
