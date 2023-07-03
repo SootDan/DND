@@ -1,6 +1,7 @@
 # This is a list of strings that are longer, supporting code readability.
 import random
 
+
 # When user types !support
 support = f'''Hi! I\'m the friendly and easy to use <@1078282090673602580>.
 To roll a die, simply type it like this: `!roll 3d20+3`
@@ -9,10 +10,12 @@ Roll initiative through `!initiative`.
 Start the turn timer with `!turn` and end combat with `!turn_end`.
 Summon this command with `!support`.'''
 
+
 # Part of !campaign embed
 campaign_desc = '''In a world, flooded in a natural disaster,
 the Prometheus explores the one true sea in search of adventure, land, and, most importantly, gold. The crew must be careful, however: 
 The sea has become a perilous plane with dangers at every corner.'''
+
 
 # Dict to figure out UUID, characters, and pronouns
 char_dict = {
@@ -49,3 +52,7 @@ char_dict = {
         'pronoun': 'their'
     }
 }
+
+
+# Links for images
+enemy_list_img = 'https://cdn-icons-png.flaticon.com/512/361/361245.png'
