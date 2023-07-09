@@ -3,7 +3,7 @@ import random
 
 
 # When user types !support
-support = f'''Hi! I\'m the friendly and easy to use <@1078282090673602580>.
+desc_support = f'''Hi! I\'m the friendly and easy to use <@1078282090673602580>.
 To roll a die, simply type it like this: `!roll 3d20+3`
 For information on the current campaign, type `!campaign`.
 Roll initiative through `!initiative`.
@@ -12,13 +12,13 @@ Summon this command with `!support`.'''
 
 
 # Part of !campaign embed
-campaign_desc = '''In a world, flooded in a natural disaster,
+desc_campaign = '''In a world, flooded in a natural disaster,
 the Prometheus explores the one true sea in search of adventure, land, and, most importantly, gold. The crew must be careful, however: 
 The sea has become a perilous plane with dangers at every corner.'''
 
 
 # Dict to figure out UUID, characters, and pronouns
-char_dict = {
+dict_char = {
     1066472550797938769: {
         'character': '🏹 Erhice',
         'pronoun': 'his'
@@ -55,4 +55,7 @@ char_dict = {
 
 
 # Links for images
-enemy_list_img = 'https://cdn-icons-png.flaticon.com/512/361/361245.png'
+img_enemy_list = 'https://cdn-icons-png.flaticon.com/512/361/361245.png'
+img_support = 'https://static.vecteezy.com/system/resources/previews/001/187/438/original/heart-png.pn'
+img_campaign = 'https://cdn.discordapp.com/attachments/876359609034608670/1084211633238315190/flag-pride-jolly-roger.gif'
+

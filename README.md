@@ -1,5 +1,5 @@
 # D&D-Bot
-Public Discord bot to use, written completely in Python 3.11. 
+Public Discord bot to use, written completely in Python 3.10. 
 
 ## TO-DO 
 Add time conversion, music, dice rolling

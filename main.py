@@ -5,17 +5,20 @@ files, it will not have any functionality.
 '''
 import discord, asyncio
 from discord.ext import commands
-from privatefiles import token # Conceals token string
+from privatefiles import token # Conceals token string for privacy
 
 # Adds asyncio cogs
-from dndice import DNDice
+from dndice import DNDice, Support
 
 # Initalizes bot config.
 intents = discord.Intents.default()
 intents.members = True
 intents.message_content = True
 bot = commands.Bot(command_prefix = '!', intents = intents)
+
+# Cogs for the bot
 dnd = DNDice(bot) # Makes class import into a module, e.g. dnd.turn_order()
+support = Support(bot)
 
 @bot.event
 async def on_ready():
@@ -28,7 +31,8 @@ async def main():
     # Adds bot functionality.
     async with bot:
         # TO-DO: add music functionality, timeconversion
-        await bot.add_cog(DNDice(bot))
+        await bot.add_cog(dnd) # DNDice module (dndice.py)
+        await bot.add_cog(support) # Support module (dndice.py)
         await bot.start(token)
 
 asyncio.run(main()) # Runs the bot! Should print out a log as defined by on_ready()
