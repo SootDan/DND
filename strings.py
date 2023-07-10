@@ -20,35 +20,35 @@ The sea has become a perilous plane with dangers at every corner.'''
 # Dict to figure out UUID, characters, and pronouns
 dict_char = {
     1066472550797938769: {
-        'character': '🏹 Erhice',
+        'character': '\U0001F6AC Erhice',
         'pronoun': 'his'
     },
     375041751737434112: {
-        'character': '🍊 Orange',
+        'character': '\U0001F34A Orange',
         'pronoun': random.choice(['his', 'her', 'their']) # Any/All, selected at random
     },
     84011476947304448: {
-        'character': '🐍 Baughl',
+        'character': '\U0001F40D Baughl',
         'pronoun': 'his'
     },
     84898094323335168: {
-        'character': '🐢 Tootle',
+        'character': '\U0001F422 Tootle',
         'pronoun': 'his'
     },
     242297398058156034: {
-        'character': '🛡️ Morgan',
+        'character': '\U0001F518 Morgan',
         'pronoun': 'her'
     },
     265624837001576448: {
-        'character': '🐱 Ylvie',
+        'character': '\U0001F431 Ylvie',
         'pronoun': 'her'
     },
     738179922933317732: {
-        'character': '👑 Dungeon Master',
+        'character': '\U0001F451 Dungeon Master',
         'pronoun': random.choice(['her', 'their']) # She/They, selected at random
     },
     'default': { # If no matching UUID has been found, default to They/Them
-        'character': '🎲 Player',
+        'character': '\U0001F3B2 Player',
         'pronoun': 'their'
     }
 }
@@ -58,4 +58,3 @@ dict_char = {
 img_enemy_list = 'https://cdn-icons-png.flaticon.com/512/361/361245.png'
 img_support = 'https://static.vecteezy.com/system/resources/previews/001/187/438/original/heart-png.pn'
 img_campaign = 'https://cdn.discordapp.com/attachments/876359609034608670/1084211633238315190/flag-pride-jolly-roger.gif'
-
