@@ -1,6 +1,6 @@
-import discord, asyncio
+import discord, asyncio, random
 from discord.ext import commands
-from strings import img_enemy_list, desc_support, img_support, desc_campaign, img_campaign
+from strings import img_enemy_list, desc_support, img_support, desc_campaign, img_campaign, dict_char
 from privatefiles import doc_campaign, char_baughl, char_erhice, char_morgan, char_orange, char_tootle, char_ylvie
 
 # Initalizes bot config.
@@ -21,14 +21,7 @@ class DNDice(commands.Cog):
         self.bot = bot
         self.turn_number = 0
         self.enemy_list = ''
-    
-    @commands.command()
-    async def turn_order(self, ctx, *args):
-        # Directly affects self.enemy_list.
-        self.enemy_list = [enemy.strip() for enemy in " ".join(args).split(",")]
-        await ctx.send(f"The current turn order is: {', '.join(self.enemy_list)}.")
-        await asyncio.sleep(5); await ctx.message.delete()
-    
+
     @commands.command()
     async def turn(self, ctx):
         # Increases self.turn_number by 1. Creates an embed from a template.
@@ -42,7 +35,61 @@ class DNDice(commands.Cog):
             enemy_list.description = f'Turn Order: \n {", ".join(self.enemy_list)}'
         await ctx.send(embed = enemy_list)
         await asyncio.sleep(5); await ctx.message.delete()
+
+    @commands.command()
+    async def turn_order(self, ctx, *args):
+        # Directly affects self.enemy_list.
+        self.enemy_list = [enemy.strip() for enemy in " ".join(args).split(",")]
+        await ctx.send(f"The current turn order is: {', '.join(self.enemy_list)}.")
+        await asyncio.sleep(5); await ctx.message.delete()
+    
+    @commands.command()
+    async def turn_end(self, ctx):
+        # Resets self.turn_number and ends combat.
+        await ctx.send(f'**Combat ended after {self.turn_number} turns!')
+        self.turn_number = 0; self.enemy_list = ''
+        await asyncio.sleep(5); await ctx.message.delete()
+    
+    @commands.command()
+    async def roll(self, ctx, arg):
+        # Dice rolling command, potentially infinite dice eyes.
+        content = arg
+        author = ctx.author.id
+        # Checks the dict for characters and pronouns, reference strings.py for full list
+        character = dict_char[author]['character']
+        pronoun = dict_char[author]['pronoun']
+        try:
+            # Checks if arg is in correct format (e.g. 3d20) and splices it into list.
+            content = content.translate(str.maketrans({'d': ' ', '+': ' ', '-': ' '}))
+            separator = list(content.split(' ')) # [0] multiplier | [1] eyes | [2] addend
+
+            if not separator[0].isnumeric():
+                # Converts multiplier to 1 if none is given
+                separator[0] = 1
+            
+            if not separator[2]:
+                # Checks if addend is given. Assign 0 if not.
+                separator[2] = 0
+            
+            # Calculates the roll and adds it to a list that can later be displayed
+            rng = [random.randint(1, int(separator[1])) + int(separator[2]) for _ in range(int(separator[0]))]
         
+        except:
+            msg_error = await ctx.send(f'Invalid input. Did you try the format `!roll XdY+Z`?')
+            await asyncio.sleep(5); await ctx.message.delete(); await msg_error.delete()
+        
+        # Output to user here.
+        # This try-except block is because of a Discord limitation where you can only have up to 5000 characters.
+        try:
+            # will work if message <= 5000
+            await ctx.send(f'{character} <@{author}> rolled a {sum(rng)} with {pronoun} {separator[0]}d{separator[1]}+{separator[2]}.`{rng}`')
+            await asyncio.sleep(5); await ctx.message.delete()
+        
+        except:
+            # does not print out rng list because of > 5000
+            await ctx.send(f'{character} <@{author}> rolled a {sum(rng)} with {pronoun} {separator[0]}d{separator[1]}+{separator[2]}.')
+
+           
 
 # !!!CLASS BELOW IS WIP!!!
 class TimeConversion(commands.Cog):
@@ -93,6 +140,9 @@ class Support(commands.Cog):
         campaign.set_thumbnail(url = img_campaign)
         await ctx.send(embed = campaign)
         await asyncio.sleep(5); await ctx.message.delete()
-
-
-# TO-DO: add turn_end, initiative, roll
+    
+    @commands.command()
+    async def initiative(self, ctx):
+        # Quick help to roll the dice, useful to sort chat.
+        await ctx.send('**Roll for Initiative!**\n*Command:* `!roll d20`')
+        await asyncio.sleep(5); await ctx.message.delete()
