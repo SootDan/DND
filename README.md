@@ -12,5 +12,5 @@ Comments after rolls
 Modifier in rolls  
 
 ### Known Bugs
-roll() only takes full input, such as 1d20+1, but not d20
+Currently none.
 
