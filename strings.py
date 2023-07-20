@@ -58,3 +58,4 @@ dict_char = {
 img_enemy_list = 'https://cdn-icons-png.flaticon.com/512/361/361245.png'
 img_support = 'https://static.vecteezy.com/system/resources/previews/001/187/438/original/heart-png.pn'
 img_campaign = 'https://cdn.discordapp.com/attachments/876359609034608670/1084211633238315190/flag-pride-jolly-roger.gif'
+img_timer = 'https://static.thenounproject.com/png/691206-200.png'
