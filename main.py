@@ -8,7 +8,7 @@ from discord.ext import commands
 from privatefiles import token # Conceals token string for privacy
 
 # Adds asyncio cogs
-from dndice import DNDice, Support
+from dndice import DNDice, Support, TimeConversion
 
 # Initalizes bot config.
 intents = discord.Intents.default()
@@ -19,6 +19,7 @@ bot = commands.Bot(command_prefix = '!', intents = intents)
 # Cogs for the bot
 dnd = DNDice(bot) # Makes class import into a module, e.g. dnd.turn_order()
 support = Support(bot)
+timeconversion = TimeConversion(bot)
 
 @bot.event
 async def on_ready():
@@ -33,6 +34,7 @@ async def main():
         # TO-DO: add music functionality, timeconversion
         await bot.add_cog(dnd) # DNDice module (dndice.py)
         await bot.add_cog(support) # Support module (dndice.py)
+        await bot.add_cog(timeconversion) # Time conversion module (dndice.py)
         await bot.start(token)
 
 asyncio.run(main()) # Runs the bot! Should print out a log as defined by on_ready()
