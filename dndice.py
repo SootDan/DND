@@ -1,15 +1,19 @@
 import discord, asyncio, random, pytz
 from discord.ext import commands
 from datetime import datetime, timedelta
-from strings import img_enemy_list, desc_support, img_support, desc_campaign, img_campaign, dict_char, img_timer
+from strings import desc_campaign, desc_support, desc_timer, dict_char
+from strings import img_campaign, img_enemy_list, img_support, img_timer
 from privatefiles import doc_campaign, char_baughl, char_erhice, char_morgan, char_orange, char_tootle, char_ylvie
 
 # Initalizes bot config.
 intents = discord.Intents.default()
-intents.members = True
-intents.message_content = True
 bot = commands.Bot(command_prefix = '!', intents = intents)
 
+async def bot_return(ctx, *args, **kwargs):
+    # Small function to add to each command, returns output and deletes input after a delay.
+    output = await ctx.send(*args, **kwargs)
+    await asyncio.sleep(5); await ctx.message.delete()
+    return output
 
 class DNDice(commands.Cog):
     '''
@@ -33,66 +37,68 @@ class DNDice(commands.Cog):
         if self.enemy_list:
             # Checks if self.enemy_list is empty. If it is not, edits enemy_list() with their turn order.
             enemy_list.description = f'Turn Order: \n {", ".join(self.enemy_list)}'
-        await ctx.send(embed = enemy_list)
-        await asyncio.sleep(5); await ctx.message.delete()
+        await bot_return(ctx, embed = enemy_list)
 
     @commands.command()
     async def turn_order(self, ctx, *args):
         # Directly affects self.enemy_list.
-        self.enemy_list = [enemy.strip() for enemy in " ".join(args).split(",")]
-        await ctx.send(f"The current turn order is: {', '.join(self.enemy_list)}.")
-        await asyncio.sleep(5); await ctx.message.delete()
+        self.enemy_list = [enemy.strip() for enemy in ' '.join(args).split(',')]
+        await bot_return(ctx, f'The current turn order is: {", ".join(self.enemy_list)}.')
     
     @commands.command()
     async def turn_end(self, ctx):
         # Resets self.turn_number and ends combat.
-        await ctx.send(f'**Combat ended after {self.turn_number} turns!')
+        await bot_return(ctx, f'**Combat ended after {self.turn_number} turns!**')
         self.turn_number = 0; self.enemy_list = ''
-        await asyncio.sleep(5); await ctx.message.delete()
+    
+    async def roll_output(self, ctx, arg, dice_type = 0):
+        # Performs a Dungeons & Dragons dice roll.
+        # This function is not called by a user and serves as a calculator for the actual input commands below.
+        # Dice type parameters: 0: Standard, 1: Advantage, 2: Disadvantage
+        content = arg
+        author = ctx.author.id
+        character = dict_char[author]['character']                          # Sets character as defined by UUID.
+        pronoun = dict_char[author]['pronoun']                              # Finds custom pronoun set as applicable.
+        
+        try:
+            content = content.translate(str.maketrans({'d': ' ', '+': ' ', '-': ' -'}))
+            separator = list(content.split(' '))                            # [0] Multiplier | [1] Eyes | [2] Addend
+            # Handles multiplier of dice, checks which dice type it is
+            separator[0] = 1 if dice_type == 0 and not separator[0].isnumeric() else 2 if dice_type > 0 else separator[0]   
+            separator.append(0) if len(separator) < 3 else None             # Adds +0 if no addend is given.
+
+            # Calculates the roll and adds it to a list as output. 
+            rng = [random.randint(1, int(separator[1])) + int(separator[2]) for _ in range(int(separator[0]))]
+            addend_sign = '+' if int(separator[2]) >= 0 else ''             # Changes addend sign in the output if >= 0.
+            output_msg = ['standard', 'advantage', 'disadvantage']
+            result = [sum(rng), max(rng), min(rng)]
+
+            # Output to user here. Respects Discord limitations of up to 5000 characters by removing list if > 5000.
+            try:
+                await bot_return(ctx, f'{character} rolled a **{result[dice_type]}** with {pronoun} {output_msg[dice_type]} roll! `{separator[0]}d{separator[1]}{addend_sign}{separator[2]} | {rng}`')
+            except:
+                await bot_return(ctx, f'{character} rolled a **{result[dice_type]}** with {pronoun} {output_msg[dice_type]} roll! `{separator[0]}d{separator[1]}{addend_sign}{separator[2]}`')
+
+        except:
+            roll_types = ['roll XdY+Z', 'advantage dY+Z', 'disadvantage dY+Z']
+            msg_error = 'Invalid input. Did you try the format `!' + roll_types[dice_type] + '`?'
+            await bot_return(ctx, msg_error)
     
     @commands.command()
     async def roll(self, ctx, arg):
-        # Dice rolling command, potentially infinite dice eyes.
-        content = arg
-        author = ctx.author.id
-        # Checks the dict for characters and pronouns, reference strings.py for full list
-        character = dict_char[author]['character']
-        pronoun = dict_char[author]['pronoun']
-        try:
-            # Checks if arg is in correct format (e.g. 3d20) and splices it into list.
-            content = content.translate(str.maketrans({'d': ' ', '+': ' ', '-': ' -'}))
-            separator = list(content.split(' ')) # [0] multiplier | [1] eyes | [2] addend
-            print(separator)
+        # Standard roll with an infinite possibility of input choices, e.g. 99d999+99.
+        await self.roll_output(ctx, arg, dice_type = 0)
+    
+    @commands.command()
+    async def advantage(self, ctx, arg):
+        # Advantage roll. Always chooses higher of two dice rolls.
+        await self.roll_output(ctx, arg, dice_type = 1)
+    
+    @commands.command()
+    async def disadvantage(self, ctx, arg):
+        # Disadvantage roll. Always chooses lower of two dice rolls.
+        await self.roll_output(ctx, arg, dice_type = 2)
 
-            if not separator[0].isnumeric():
-                # Converts multiplier to 1 if none is given.
-                separator[0] = 1
-            
-            try:
-                separator[2]
-            except IndexError:
-                # Set addend to +-0 if none is given.
-                separator.append(0)
-            
-            # Calculates the roll and adds it to a list that can later be displayed. Changes addend sign in the output if >= 0
-            rng = [random.randint(1, int(separator[1])) + int(separator[2]) for _ in range(int(separator[0]))]
-            addend_sign = '+' if int(separator[2]) >= 0 else ''
-        
-        except:
-            msg_error = await ctx.send(f'Invalid input. Did you try the format `!roll XdY+Z`?')
-            await asyncio.sleep(5); await ctx.message.delete(); await msg_error.delete()
-        
-        # Output to user here.
-        # This try-except block is because of a Discord limitation where you can only have up to 5000 characters.
-        try:
-            # Will work if message <= 5000
-            await ctx.send(f'{character} <@{author}> rolled a {sum(rng)} with {pronoun} {separator[0]}d{separator[1]}{addend_sign}{separator[2]}.`{rng}`')
-            await asyncio.sleep(5); await ctx.message.delete()
-        
-        except:
-            # Does not print out rng list because of > 5000
-            await ctx.send(f'{character} <@{author}> rolled a {sum(rng)} with {pronoun} {separator[0]}d{separator[1]}{addend_sign}{separator[2]}.')
-     
 
 class TimeConversion(commands.Cog):
     '''
@@ -102,7 +108,7 @@ class TimeConversion(commands.Cog):
         # Initializes time conversion cog.
         self.bot = bot
         self.time_zones = [pytz.timezone('Europe/London'), pytz.timezone('Europe/Berlin')]
-    
+
     @commands.command()
     async def utc(self, ctx, arg):
         # Converts dates from UTC into B(S)T and CE(S)T. Automatically checks if DST applies.
@@ -121,13 +127,11 @@ class TimeConversion(commands.Cog):
         
         timer_list = discord.Embed(
             title = f'{utc_time} UTC is:',
-            description = f'''
-            :flag_ie: / :flag_gb: ............... {british_time.strftime('%H:%M')}
-            :flag_de: / :flag_pl: ............... {european_time.strftime('%H:%M')}''',
+            description = desc_timer.format(british_time.strftime('%H:%M'), european_time.strftime('%H:%M')),
             color = discord.Color.from_rgb(156, 89, 209))
         timer_list.set_thumbnail(url = img_timer)
-        await ctx.send(embed = timer_list)
-        await asyncio.sleep(5); await ctx.message.delete()
+        await bot_return(ctx, embed = timer_list)
+        
         
 class Support(commands.Cog):
     '''
@@ -145,8 +149,7 @@ class Support(commands.Cog):
             description = desc_support,
             color = discord.Color.from_rgb(245, 169, 184))
         support.set_thumbnail(url = img_support)
-        await ctx.send(embed = support)
-        await asyncio.sleep(5); await ctx.message.delete()
+        await bot_return(ctx, embed = support)
     
     @commands.command()
     async def campaign(self, ctx):
@@ -164,11 +167,9 @@ class Support(commands.Cog):
         campaign.add_field(name = 'Tootle', value = char_tootle)
         campaign.add_field(name = 'Ylvie', value = char_ylvie)
         campaign.set_thumbnail(url = img_campaign)
-        await ctx.send(embed = campaign)
-        await asyncio.sleep(5); await ctx.message.delete()
+        await bot_return(ctx, embed = campaign)
     
     @commands.command()
     async def initiative(self, ctx):
         # Quick help to roll the dice, useful to sort chat.
-        await ctx.send('**Roll for Initiative!**\n*Command:* `!roll d20`')
-        await asyncio.sleep(5); await ctx.message.delete()
+        await bot_return(ctx, '**Roll for Initiative!**\n*Command:* `!roll d20`')

@@ -1,3 +1,7 @@
 privatefiles.py
+discord.log
 
+Soundboard/
 __pycache__/
+venv/
+.git/
