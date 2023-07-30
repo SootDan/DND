@@ -1,6 +1,4 @@
-import discord, asyncio
-from os import listdir # Soundboard check.
-from os.path import isfile, join # Useful for soundboard check only.
+import discord, asyncio, os
 from discord.ext import commands
 from dndice import bot_return
 from youtube_init import ffmpeg_options, ytdl
@@ -39,6 +37,7 @@ class Voice(commands.Cog):
     '''
     def __init__(self, bot):
         self.bot = bot
+        self.soundboard_directory = os.path.join(os.path.dirname(__file__), 'Soundboard')
 
     @commands.command()
     async def connect(self, ctx):
@@ -70,23 +69,24 @@ class Voice(commands.Cog):
     async def soundboard(self, ctx, *, query):
         # Plays a soundboard file.
         file = query.lower()
-        # Files are stored under Soundboard/ and are all .mp3.
-        if not file.startswith('Soundboard/'):
-            file = 'Soundboard/' + file
-        if not file.endswith('.mp3'):
-            file = file + '.mp3'
+        # Checks if it is a full path or just the file name.
+        if not os.path.isabs(file):
+            file = os.path.join(self.soundboard_directory, file + '.mp3')
 
-        source = discord.PCMVolumeTransformer(discord.FFmpegPCMAudio(file))
-        ctx.voice_client.play(source)
-        await bot_return(ctx, f'Playing soundboard file: {query}')
+        # Checks if the file exists. If it does, plays it.
+        if not os.path.isfile(file):
+            await bot_return(ctx, 'File does not exist.')
+        else:
+            source = discord.PCMVolumeTransformer(discord.FFmpegPCMAudio(file))
+            ctx.voice_client.play(source)
+            await bot_return(ctx, f'Playing soundboard file: {query}')
     
     @commands.command()
     async def soundboard_list(self, ctx):
-        # Lists all available sound files in Soundboard/ for users.
-        soundboard_files = [f for f in listdir('Soundboard/') if isfile(join('Soundboard', f))]
-        for file in soundboard_files:
-            ... # WIP: Change it so it will not display .mp3 anymore.
-        await bot_return(ctx, f'The currently available sound files are: \n{soundboard_files}')
+        # Lists all available sound files in Soundboard/ for users. Removes '.mp3' automatically.
+        soundboard_files = [f[:-4] for f in os.listdir(self.soundboard_directory) if os.path.isfile(os.path.join(self.soundboard_directory, f))]
+        file_names = ' | '.join(soundboard_files)
+        await bot_return(ctx, f'The currently available sound files are: \n{file_names}')
         
     @commands.command()
     async def volume(self, ctx, volume: int):

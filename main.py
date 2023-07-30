@@ -17,6 +17,9 @@ intents.members = True
 intents.message_content = True
 bot = commands.Bot(command_prefix = '!', intents = intents)
 
+# Sets up in-depth logging for debugging. Comment away if only running the bot.
+# discord.utils.setup_logging()
+
 # Cogs for the bot
 dnd = DNDice(bot) # Makes class import into a module, e.g. dnd.turn_order()
 support = Support(bot)
