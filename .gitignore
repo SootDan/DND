@@ -1,0 +1,6 @@
+discord.log
+Assets/privatefiles.py
+Assets/__pycache__/
+Modules/__pycache__
+Modules/Soundboard
+.git/
